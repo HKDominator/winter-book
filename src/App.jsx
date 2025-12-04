@@ -1,389 +1,400 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Star, ChevronRight, Sparkles } from 'lucide-react';
+import { Star, ChevronRight, Sparkles, Heart, Music, Volume2, VolumeX } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const WinterBook = () => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [starClicked, setStarClicked] = useState(false);
-  const [showHug, setShowHug] = useState(false);
+// --- COMPONENTS ---
 
-  // Snowflake component
-  const Snowflakes = () => {
-    const snowflakes = Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      animationDuration: `${Math.random() * 3 + 2}s`,
-      animationDelay: `${Math.random() * 2}s`,
-      opacity: Math.random() * 0.6 + 0.4,
-    }));
+// 1. Optimized Snow Component (Memoized to prevent flickering)
+const Snowflakes = React.memo(() => {
+  // Use state and effect to generate snowflakes on client-side only
+  // This avoids "impure function during render" errors with Math.random()
+  const [snowflakes, setSnowflakes] = useState([]);
 
-    return (
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {snowflakes.map((flake) => (
-          <div
-            key={flake.id}
-            className="absolute text-white text-opacity-80"
-            style={{
-              left: flake.left,
-              top: '-10px',
-              animation: `fall ${flake.animationDuration} linear infinite`,
-              animationDelay: flake.animationDelay,
-              opacity: flake.opacity,
-            }}
-          >
-            ❄
-          </div>
-        ))}
-        <style jsx>{`
-          @keyframes fall {
-            to {
-              transform: translateY(100vh);
-            }
-          }
-        `}</style>
-      </div>
-    );
-  };
+  useEffect(() => {
+    // Wrap in setTimeout to avoid "synchronous setState in effect" warning
+    // This pushes the update to the next tick, preventing cascading renders blocking the paint
+    const timer = setTimeout(() => {
+      const generatedSnowflakes = Array.from({ length: 50 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        animationDuration: Math.random() * 5 + 5, // Slower fall (5-10s)
+        animationDelay: Math.random() * 5,
+        opacity: Math.random() * 0.5 + 0.3,
+        size: Math.random() * 0.5 + 0.5 // Random sizes
+      }));
+      setSnowflakes(generatedSnowflakes);
+    }, 0);
 
-  // Page 0 - Cover
-  const CoverPage = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center min-h-screen p-8 text-center"
-    >
-      <motion.div
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="mb-8"
-      >
-        <Sparkles className="w-16 h-16 text-yellow-300" />
-      </motion.div>
-      <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-serif">
-        The Winter Book
-      </h1>
-      <h2 className="text-3xl md:text-4xl text-pink-200 mb-12 font-serif italic">
-        of Carla
-      </h2>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setCurrentPage(1)}
-        className="bg-gradient-to-r from-pink-400 to-purple-500 text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-      >
-        Deschide Cartea ✨
-      </motion.button>
-      <p className="text-white text-opacity-80 mt-8 max-w-md text-lg">
-        Bună, iubita mea. Moș Nicolae ți-a lăsat ceva special… ceva făcut de cineva care te iubește infinit.
-      </p>
-    </motion.div>
-  );
-
-  // Page 1 - Our Story
-  const StoryPage = () => {
-    const [heartFill, setHeartFill] = useState(0);
-
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        const interval = setInterval(() => {
-          setHeartFill((prev) => {
-            if (prev >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return prev + 2;
-          });
-        }, 30);
-        return () => clearInterval(interval);
-      }, 500);
-      return () => clearTimeout(timer);
-    }, []);
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -100 }}
-        className="flex flex-col items-center justify-center min-h-screen p-8"
-      >
-        <div className="max-w-2xl bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
-          <h2 className="text-4xl font-bold text-white mb-6 font-serif text-center">
-            📖 Povestea Noastră
-          </h2>
-          <p className="text-white text-xl leading-relaxed mb-8 text-center">
-            A fost odată ca niciodată un băiat pe nume Andrei…
-            <br /><br />
-            Și o fată care avea cel mai frumos zâmbet din lume.
-            <br /><br />
-            Când s-au întâlnit, universul a știut că ei sunt destinați să fie împreună.
-          </p>
-          <motion.div className="flex justify-center">
-            <svg width="120" height="120" viewBox="0 0 100 100">
-              <defs>
-                <linearGradient id="heartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#ec4899" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M50,90 C50,90 10,60 10,35 C10,20 20,10 30,10 C40,10 45,15 50,25 C55,15 60,10 70,10 C80,10 90,20 90,35 C90,60 50,90 50,90 Z"
-                fill="url(#heartGradient)"
-                style={{
-                  clipPath: `inset(${100 - heartFill}% 0 0 0)`,
-                  transition: 'clip-path 0.1s linear',
-                }}
-              />
-            </svg>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  };
-
-  // Page 2 - Little Things
-  const LittleThingsPage = () => {
-    const things = [
-      "Felul în care râzi 😊",
-      "Îmbrățișările tale calde 🤗",
-      "Fața ta dimineața ☀️",
-      "Glumele noastre secrete 🤫",
-      "Lucrurile drăguțe pe care le faci 💕"
-    ];
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -100 }}
-        className="flex flex-col items-center justify-center min-h-screen p-8"
-      >
-        <div className="max-w-2xl bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
-          <h2 className="text-4xl font-bold text-white mb-8 font-serif text-center">
-            💖 Lucruri Mici Care Mă Fac Fericit
-          </h2>
-          <div className="space-y-4">
-            {things.map((thing, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="bg-white bg-opacity-20 rounded-xl p-4 text-white text-lg"
-              >
-                {thing}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
-  // Page 3 - Interactive Star
-  const InteractiveStarPage = () => {
-    const handleStarClick = () => {
-      setStarClicked(true);
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    };
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -100 }}
-        className="flex flex-col items-center justify-center min-h-screen p-8"
-      >
-        <div className="max-w-2xl text-center">
-          <h2 className="text-3xl text-white mb-12 font-serif">
-            {starClicked ? "" : "✨ Atinge steaua ✨"}
-          </h2>
-          <AnimatePresence mode="wait">
-            {!starClicked ? (
-              <motion.button
-                key="star"
-                whileHover={{ scale: 1.2, rotate: 180 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleStarClick}
-                className="text-yellow-300 cursor-pointer"
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 10, -10, 0]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Star className="w-32 h-32 fill-current" />
-              </motion.button>
-            ) : (
-              <motion.div
-                key="message"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-gradient-to-br from-yellow-200 to-pink-200 rounded-3xl p-12 shadow-2xl"
-              >
-                <p className="text-3xl text-purple-900 font-serif italic">
-                  "Mi-ai luminat viața mai frumos decât orice stea."
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    );
-  };
-
-  // Page 4 - Code Page
-  const CodePage = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      className="flex flex-col items-center justify-center min-h-screen p-8"
-    >
-      <div className="max-w-3xl bg-gray-900 rounded-3xl p-8 shadow-2xl border-4 border-pink-400">
-        <h2 className="text-3xl font-bold text-pink-400 mb-6 font-mono text-center">
-          💻 Moș Nicolae în Script.js
-        </h2>
-        <pre className="text-green-400 font-mono text-sm md:text-base overflow-x-auto">
-          <code>{`const love = Infinity;
-const girlfriend = "Carla";
-const happiness = girlfriend + " + " + love;
-
-function mosNicolae() {
-  console.log("La mulți ani de Moș Nicolae,");
-  console.log("iubirea mea!");
-  return "❤️".repeat(love);
-}
-
-// Running forever...
-while (true) {
-  mosNicolae();
-}`}</code>
-        </pre>
-      </div>
-    </motion.div>
-  );
-
-  // Page 5 - Final Gift
-  const FinalPage = () => {
-    const handleHug = () => {
-      setShowHug(true);
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.5 },
-        colors: ['#ec4899', '#8b5cf6', '#f472b6']
-      });
-      setTimeout(() => setShowHug(false), 3000);
-    };
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -100 }}
-        className="flex flex-col items-center justify-center min-h-screen p-8"
-      >
-        <div className="max-w-3xl text-center">
-          <motion.div
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 font-serif">
-              🎁 Cadoul Tău
-            </h2>
-          </motion.div>
-          <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-12 shadow-2xl mb-8">
-            <p className="text-2xl md:text-3xl text-white leading-relaxed mb-6">
-              Cadoul meu de Moș Nicolae e simplu:
-            </p>
-            <p className="text-3xl md:text-4xl text-pink-300 font-bold mb-6">
-              iubirea mea pentru tine.
-            </p>
-            <div className="space-y-4 text-xl md:text-2xl text-white">
-              <p>Nu expiră niciodată.</p>
-              <p>Nu scade.</p>
-              <p className="text-3xl text-yellow-300">Crește. ✨</p>
-            </div>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleHug}
-            className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-12 py-6 rounded-full text-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
-          >
-            ❤️ Apasă pentru o îmbrățișare virtuală
-          </motion.button>
-          {showHug && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.5, 1] }}
-              className="mt-8 text-8xl"
-            >
-              🤗
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
-    );
-  };
-
-  const pages = [
-    <CoverPage />,
-    <StoryPage />,
-    <LittleThingsPage />,
-    <InteractiveStarPage />,
-    <CodePage />,
-    <FinalPage />
-  ];
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      <Snowflakes />
-      
-      {/* Candle glow effect */}
-      <div className="fixed bottom-10 left-10 w-20 h-20 bg-yellow-400 rounded-full opacity-30 blur-3xl animate-pulse pointer-events-none" />
-      
-      <AnimatePresence mode="wait">
-        {pages[currentPage]}
-      </AnimatePresence>
+    <div className="fixed inset-0 pointer-events-none z-0">
+      {snowflakes.map((flake) => (
+        <div
+          key={flake.id}
+          className="absolute bg-white rounded-full"
+          style={{
+            left: `${flake.left}%`,
+            top: '-10px',
+            width: `${flake.size}rem`,
+            height: `${flake.size}rem`,
+            opacity: flake.opacity,
+            animation: `fall ${flake.animationDuration}s linear infinite`,
+            animationDelay: `-${flake.animationDelay}s`, // Negative delay starts animation immediately
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes fall {
+          0% { transform: translateY(-10vh) translateX(0px); }
+          100% { transform: translateY(110vh) translateX(20px); }
+        }
+      `}</style>
+    </div>
+  );
+});
 
-      {/* Navigation */}
-      {currentPage > 0 && currentPage < pages.length - 1 && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setCurrentPage(currentPage + 1)}
-          className="fixed bottom-10 right-10 bg-white bg-opacity-20 backdrop-blur-md text-white p-4 rounded-full shadow-lg hover:bg-opacity-30 transition-all"
-        >
-          <ChevronRight className="w-8 h-8" />
-        </motion.button>
-      )}
+// --- PAGES ---
 
-      {/* Page indicator */}
-      {currentPage > 0 && (
-        <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-2">
-          {pages.slice(1).map((_, index) => (
-            <div
-              key={index}
-              className={`w-3 h-3 rounded-full transition-all ${
-                currentPage === index + 1
-                  ? 'bg-white w-8'
-                  : 'bg-white bg-opacity-30'
-              }`}
-            />
-          ))}
+// Page 0: Cover
+const CoverPage = ({ onStart }) => (
+  <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center relative z-10">
+    <motion.div
+      animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+      transition={{ duration: 3, repeat: Infinity }}
+      className="mb-8 relative"
+    >
+      <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-20 rounded-full"></div>
+      <Sparkles className="w-20 h-20 text-yellow-200 relative z-10" />
+    </motion.div>
+    
+    <h1 className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-amber-100 mb-4 font-display drop-shadow-lg">
+      Cartea Carlei
+    </h1>
+    
+    <h2 className="text-2xl md:text-3xl text-pink-200/80 mb-12 font-serif italic">
+      O poveste de iarnă
+    </h2>
+
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onStart}
+      className="group relative bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-full text-xl font-serif shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all hover:bg-white/20 hover:shadow-[0_0_50px_rgba(236,72,153,0.3)]"
+    >
+      <span className="relative z-10 flex items-center gap-2">
+        Deschide Cartea <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform"/>
+      </span>
+    </motion.button>
+    
+    <p className="absolute bottom-10 text-white/40 text-sm font-serif animate-pulse">
+      (Te rog să pornești sunetul 🔊)
+    </p>
+  </div>
+);
+
+// Page 1: Our Story
+const StoryPage = () => {
+  const [fill, setFill] = useState(0);
+
+  useEffect(() => {
+    // Fill the heart over 2 seconds
+    const interval = setInterval(() => {
+      setFill(prev => (prev < 100 ? prev + 1 : 100));
+    }, 20);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24 text-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl max-w-lg w-full">
+        <h2 className="text-4xl text-white mb-6 font-display">Povestea Noastră</h2>
+        <div className="text-lg md:text-xl text-gray-200 font-serif leading-relaxed space-y-4 mb-8 text-left">
+          <p>A fost odată un băiat care scria cod...</p>
+          <p>Și o fată care i-a dat un sens acelui cod.</p>
+          <p>Împreună au creat un algoritm care nu se oprește niciodată: <span className="text-pink-400 font-bold">Iubirea.</span></p>
         </div>
-      )}
+        
+        {/* SVG Heart Animation */}
+        <div className="relative w-32 h-32 mx-auto">
+          <Heart className="w-full h-full text-white/10 absolute inset-0" strokeWidth={1} />
+          <div className="absolute inset-0 overflow-hidden" style={{ height: `${fill}%`, transition: 'height 0.1s linear' }}>
+             <Heart className="w-full h-full text-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.6)]" fill="currentColor" strokeWidth={0} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default WinterBook;
+// Page 2: Little Things
+const LittleThingsPage = () => {
+  const items = [
+    { text: "Râsul tău contagios 😊", color: "from-pink-500/20 to-rose-500/20" },
+    { text: "Cum mă susții mereu 🤗", color: "from-purple-500/20 to-indigo-500/20" },
+    { text: "Serile la film 🎬", color: "from-blue-500/20 to-cyan-500/20" },
+    { text: "Că ești cea mai bună prietenă a mea 👯‍♀️", color: "from-emerald-500/20 to-teal-500/20" },
+    { text: "Că ești pur și simplu TU ✨", color: "from-amber-500/20 to-orange-500/20 border-amber-500/30" }
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24">
+      <h2 className="text-3xl md:text-4xl text-white mb-8 font-display drop-shadow-md">Lucruri Mici, Iubire Mare</h2>
+      <div className="w-full max-w-md space-y-3">
+        {items.map((item, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.15, type: 'spring', stiffness: 100 }}
+            className={`p-4 rounded-xl border border-white/5 bg-gradient-to-r ${item.color} backdrop-blur-md text-white font-serif text-lg shadow-sm`}
+          >
+            {item.text}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Page 3: The Star
+const StarPage = () => {
+  const [clicked, setClicked] = useState(false);
+
+  const handleClick = (e) => {
+    e.stopPropagation(); // Prevent navigation
+    if (!clicked) {
+      setClicked(true);
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FFD700', '#FFA500', '#ffffff']
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24 text-center">
+      <h2 className="text-3xl text-white mb-12 font-display">
+        {clicked ? "Dorința s-a îndeplinit ✨" : "Pune-ți o dorință..."}
+      </h2>
+      
+      <AnimatePresence mode="wait">
+        {!clicked ? (
+          <motion.button
+            key="star-btn"
+            onClick={handleClick}
+            whileHover={{ scale: 1.1, rotate: 15 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{ 
+              scale: [1, 1.1, 1],
+              filter: ["drop-shadow(0 0 10px rgba(250,204,21,0.3))", "drop-shadow(0 0 30px rgba(250,204,21,0.8))", "drop-shadow(0 0 10px rgba(250,204,21,0.3))"]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="cursor-pointer relative z-50" // ADDED z-50 to fix tap issue
+          >
+            <Star className="w-40 h-40 text-yellow-300 fill-yellow-300/20" strokeWidth={1} />
+          </motion.button>
+        ) : (
+          <motion.div
+            key="star-msg"
+            initial={{ opacity: 0, scale: 0.5, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white/10 backdrop-blur-xl border border-yellow-500/30 p-8 rounded-3xl max-w-sm"
+          >
+            <p className="text-2xl text-yellow-100 font-serif italic">
+              "Mi-ai luminat viața mai frumos decât orice stea de pe cer."
+            </p>
+            <div className="mt-4 text-sm text-yellow-200/60 uppercase tracking-widest">Te Iubesc</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Page 4: The Code
+const CodePage = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24">
+    <div className="w-full max-w-2xl bg-[#1e1e1e] rounded-xl overflow-hidden shadow-2xl border border-gray-700">
+      {/* Fake Mac Toolbar */}
+      <div className="bg-[#252526] px-4 py-2 flex items-center gap-2 border-b border-gray-700">
+        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        <span className="ml-2 text-xs text-gray-400 font-mono">love_logic.js</span>
+      </div>
+      
+      <div className="p-6 overflow-x-auto">
+        <pre className="font-mono text-sm md:text-base leading-relaxed">
+          <code className="block">
+            <span className="text-pink-400">const</span> <span className="text-blue-300">couple</span> = &#123;{'\n'}
+            {'  '}him: <span className="text-green-300">"Andrei"</span>,{'\n'}
+            {'  '}her: <span className="text-green-300">"Carla"</span>,{'\n'}
+            {'  '}status: <span className="text-green-300">"Happily in Love"</span>,{'\n'}
+            {'  '}years: <span className="text-orange-300">5</span>{'\n'}
+            &#125;;{'\n\n'}
+
+            <span className="text-pink-400">while</span> (<span className="text-blue-300">true</span>) &#123;{'\n'}
+            {'  '}couple.<span className="text-yellow-300">love</span>();{'\n'}
+            {'  '}couple.<span className="text-yellow-300">supportEachOther</span>();{'\n'}
+            {'  '}<span className="text-gray-500">// Nu există funcție de break</span>{'\n'}
+            &#125;
+          </code>
+        </pre>
+      </div>
+    </div>
+    <p className="mt-6 text-gray-400 font-serif italic">Singurul cod fără bug-uri.</p>
+  </div>
+);
+
+// Page 5: Final
+const FinalPage = () => {
+  const triggerHug = (e) => {
+    e.stopPropagation(); // Stop click from bubbling to nav layer
+    confetti({
+      particleCount: 300,
+      spread: 100,
+      origin: { y: 0.6 },
+      colors: ['#ec4899', '#f43f5e', '#ffffff'],
+      ticks: 200
+    });
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24 text-center">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full"
+      >
+        <h2 className="text-5xl font-display text-white mb-8">Cadoul Meu</h2>
+        
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-[0_0_40px_rgba(236,72,153,0.2)] mb-8">
+          <p className="text-xl text-pink-100 font-serif mb-6">
+            Cadoul meu de Moș Nicolae e simplu:
+          </p>
+          <p className="text-3xl font-bold text-white mb-2">Iubirea mea.</p>
+          <p className="text-lg text-pink-200/80 mb-6">(Și cizmele alea noi 😉)</p>
+          
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-pink-400 to-transparent my-6"></div>
+          
+          <p className="text-lg text-white font-serif">
+            Te iubesc azi, mâine și pentru totdeauna.
+          </p>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={triggerHug}
+          className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white py-5 rounded-2xl text-xl font-bold shadow-lg shadow-rose-500/40 flex items-center justify-center gap-3 relative z-50" // ADDED relative z-50
+        >
+          <Heart className="fill-white w-6 h-6" /> Îmbrățișare Virtuală
+        </motion.button>
+      </motion.div>
+    </div>
+  );
+};
+
+// --- MAIN APP COMPONENT ---
+
+function App() {
+  const [page, setPage] = useState(0);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const audioRef = useRef(null);
+
+  // Helper functions defined BEFORE pages array to avoid ReferenceError
+  const advancePage = (startAudio = false) => {
+    if (startAudio && audioRef.current) {
+      audioRef.current.volume = 0.3;
+      audioRef.current.play().then(() => setAudioPlaying(true)).catch(e => console.log("Audio block", e));
+    }
+    // Hardcoded length check since 'pages' is defined after
+    // or we can rely on standard hoisting if we use function declarations, 
+    // but with const/let, order matters. 5 is the index of FinalPage.
+    if (page < 5) setPage(p => p + 1);
+  };
+
+  const goBack = () => {
+    if (page > 1) setPage(p => p - 1); // Prevent going back to cover
+  };
+
+  const toggleAudio = (e) => {
+    e.stopPropagation();
+    if (audioRef.current) {
+      if (audioPlaying) audioRef.current.pause();
+      else audioRef.current.play();
+      setAudioPlaying(!audioPlaying);
+    }
+  };
+
+  const pages = [
+    { component: <CoverPage onStart={() => advancePage(true)} />, bg: "from-slate-900 via-purple-950 to-slate-900" },
+    { component: <StoryPage />, bg: "from-indigo-950 via-slate-900 to-black" },
+    { component: <LittleThingsPage />, bg: "from-slate-900 via-rose-950 to-slate-900" },
+    { component: <StarPage />, bg: "from-slate-900 via-blue-950 to-slate-900" },
+    { component: <CodePage />, bg: "from-gray-900 via-black to-gray-900" },
+    { component: <FinalPage />, bg: "from-rose-950 via-slate-900 to-black" }
+  ];
+
+  return (
+    <div className={`relative min-h-screen w-full overflow-hidden transition-colors duration-1000 bg-gradient-to-br ${pages[page].bg}`}>
+      
+      {/* 1. AUDIO ELEMENT (Place your mp3 in /public/music.mp3) */}
+      <audio ref={audioRef} loop src="/music.mp3" />
+
+      {/* 2. BACKGROUND LAYERS */}
+      <Snowflakes />
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+
+      {/* 3. CONTENT AREA (AnimatePresence) */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={page}
+          initial={{ opacity: 0, x: 100, rotate: 2 }}
+          animate={{ opacity: 1, x: 0, rotate: 0 }}
+          exit={{ opacity: 0, x: -100, rotate: -2 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="absolute inset-0 w-full h-full"
+        >
+          {pages[page].component}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* 4. NAVIGATION CONTROLS */}
+      {page > 0 && (
+        <>
+          {/* Audio Toggle */}
+          <button 
+            onClick={toggleAudio}
+            className="fixed top-6 right-6 z-50 text-white/50 hover:text-white transition-colors bg-black/20 p-2 rounded-full backdrop-blur-sm"
+          >
+            {audioPlaying ? <Volume2 size={20} /> : <VolumeX size={20} />}
+          </button>
+
+          {/* Progress Dots */}
+          <div className="fixed bottom-8 left-0 right-0 flex justify-center gap-3 z-50 pointer-events-none">
+            {pages.slice(1).map((_, i) => (
+              <div 
+                key={i} 
+                className={`h-2 rounded-full transition-all duration-300 ${i + 1 === page ? "w-8 bg-white" : "w-2 bg-white/30"}`} 
+              />
+            ))}
+          </div>
+
+          {/* TAP ZONES (Instagram style) */}
+          <div className="fixed inset-0 z-40 flex">
+            <div className="w-1/3 h-full" onClick={goBack} />
+            <div className="w-2/3 h-full cursor-pointer" onClick={() => advancePage(false)} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default App;
