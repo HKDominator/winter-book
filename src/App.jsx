@@ -8,20 +8,18 @@ import confetti from 'canvas-confetti';
 // 1. Optimized Snow Component (Memoized to prevent flickering)
 const Snowflakes = React.memo(() => {
   // Use state and effect to generate snowflakes on client-side only
-  // This avoids "impure function during render" errors with Math.random()
   const [snowflakes, setSnowflakes] = useState([]);
 
   useEffect(() => {
     // Wrap in setTimeout to avoid "synchronous setState in effect" warning
-    // This pushes the update to the next tick, preventing cascading renders blocking the paint
     const timer = setTimeout(() => {
       const generatedSnowflakes = Array.from({ length: 50 }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
-        animationDuration: Math.random() * 5 + 5, // Slower fall (5-10s)
+        animationDuration: Math.random() * 5 + 5, 
         animationDelay: Math.random() * 5,
         opacity: Math.random() * 0.5 + 0.3,
-        size: Math.random() * 0.5 + 0.5 // Random sizes
+        size: Math.random() * 0.5 + 0.5 
       }));
       setSnowflakes(generatedSnowflakes);
     }, 0);
@@ -71,7 +69,7 @@ const CoverPage = ({ onStart }) => (
     </motion.div>
     
     <h1 className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-amber-100 mb-4 font-display drop-shadow-lg">
-      Cartea Carlei
+      Cartea lui Cărluț
     </h1>
     
     <h2 className="text-2xl md:text-3xl text-pink-200/80 mb-12 font-serif italic">
@@ -112,9 +110,10 @@ const StoryPage = () => {
       <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl max-w-lg w-full">
         <h2 className="text-4xl text-white mb-6 font-display">Povestea Noastră</h2>
         <div className="text-lg md:text-xl text-gray-200 font-serif leading-relaxed space-y-4 mb-8 text-left">
-          <p>A fost odată un băiat care scria cod...</p>
-          <p>Și o fată care i-a dat un sens acelui cod.</p>
-          <p>Împreună au creat un algoritm care nu se oprește niciodată: <span className="text-pink-400 font-bold">Iubirea.</span></p>
+          <p>A fost odată ca niciodată o prințesă uimitoare, ce trăia într-un castel fermecat și asculta BTS.</p>
+          <p>Într-o zi a apărut la curtea palatului un prinț înfumurat, fără scop și fără direcție.</p>
+          <p>Printr-un miracol neașteptat, prințesa s-a îndrăgostit de prinț</p>
+          <p>De atunci, cei doi au rămas nedespărțiți, trăind fericiți împreună până la adânci bătrâneți.<span className="text-pink-400 font-bold">Iubirea.</span></p>
         </div>
         
         {/* SVG Heart Animation */}
@@ -132,16 +131,16 @@ const StoryPage = () => {
 // Page 2: Little Things
 const LittleThingsPage = () => {
   const items = [
-    { text: "Râsul tău contagios 😊", color: "from-pink-500/20 to-rose-500/20" },
-    { text: "Cum mă susții mereu 🤗", color: "from-purple-500/20 to-indigo-500/20" },
-    { text: "Serile la film 🎬", color: "from-blue-500/20 to-cyan-500/20" },
-    { text: "Că ești cea mai bună prietenă a mea 👯‍♀️", color: "from-emerald-500/20 to-teal-500/20" },
+    { text: "Cele o mie de personalități 😍", color: "from-pink-500/20 to-rose-500/20" },
+    { text: "Inima ta mare și plină de iubire ❤️", color: "from-purple-500/20 to-indigo-500/20" },
+    { text: "Afecțiunea ta nemărginită pentru toată lumea 🤗", color: "from-blue-500/20 to-cyan-500/20" },
+    { text: "Că ești cea mai bună prietenă a mea 👯", color: "from-emerald-500/20 to-teal-500/20" },
     { text: "Că ești pur și simplu TU ✨", color: "from-amber-500/20 to-orange-500/20 border-amber-500/30" }
   ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24">
-      <h2 className="text-3xl md:text-4xl text-white mb-8 font-display drop-shadow-md">Lucruri Mici, Iubire Mare</h2>
+      <h2 className="text-3xl md:text-4xl text-white mb-8 font-display drop-shadow-md">Lucruri mici ce te fac de neînlocuit</h2>
       <div className="w-full max-w-md space-y-3">
         {items.map((item, idx) => (
           <motion.div
@@ -235,7 +234,7 @@ const CodePage = () => (
             {'  '}him: <span className="text-green-300">"Andrei"</span>,{'\n'}
             {'  '}her: <span className="text-green-300">"Carla"</span>,{'\n'}
             {'  '}status: <span className="text-green-300">"Happily in Love"</span>,{'\n'}
-            {'  '}years: <span className="text-orange-300">5</span>{'\n'}
+            {'  '}years: <span className="text-orange-300">Almost 5</span>{'\n'}
             &#125;;{'\n\n'}
 
             <span className="text-pink-400">while</span> (<span className="text-blue-300">true</span>) &#123;{'\n'}
@@ -254,7 +253,7 @@ const CodePage = () => (
 // Page 5: Final
 const FinalPage = () => {
   const triggerHug = (e) => {
-    e.stopPropagation(); // Stop click from bubbling to nav layer
+    e.stopPropagation(); 
     confetti({
       particleCount: 300,
       spread: 100,
@@ -275,7 +274,7 @@ const FinalPage = () => {
         
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-[0_0_40px_rgba(236,72,153,0.2)] mb-8">
           <p className="text-xl text-pink-100 font-serif mb-6">
-            Cadoul meu de Moș Nicolae e simplu:
+            Cadoul meu de Moș Nicolae pentru tine nu este un obiect material, ci o promisiune din adâncul inimii mele.
           </p>
           <p className="text-3xl font-bold text-white mb-2">Iubirea mea.</p>
           <p className="text-lg text-pink-200/80 mb-6">(Și cizmele alea noi 😉)</p>
@@ -283,7 +282,7 @@ const FinalPage = () => {
           <div className="h-px w-full bg-gradient-to-r from-transparent via-pink-400 to-transparent my-6"></div>
           
           <p className="text-lg text-white font-serif">
-            Te iubesc azi, mâine și pentru totdeauna.
+            Te iubesc azi, te voi iubi mâine și te voi iubi pentru totdeauna.
           </p>
         </div>
 
@@ -307,20 +306,16 @@ function App() {
   const [audioPlaying, setAudioPlaying] = useState(false);
   const audioRef = useRef(null);
 
-  // Helper functions defined BEFORE pages array to avoid ReferenceError
   const advancePage = (startAudio = false) => {
     if (startAudio && audioRef.current) {
       audioRef.current.volume = 0.3;
       audioRef.current.play().then(() => setAudioPlaying(true)).catch(e => console.log("Audio block", e));
     }
-    // Hardcoded length check since 'pages' is defined after
-    // or we can rely on standard hoisting if we use function declarations, 
-    // but with const/let, order matters. 5 is the index of FinalPage.
     if (page < 5) setPage(p => p + 1);
   };
 
   const goBack = () => {
-    if (page > 1) setPage(p => p - 1); // Prevent going back to cover
+    if (page > 1) setPage(p => p - 1); 
   };
 
   const toggleAudio = (e) => {
@@ -344,7 +339,7 @@ function App() {
   return (
     <div className={`relative min-h-screen w-full overflow-hidden transition-colors duration-1000 bg-gradient-to-br ${pages[page].bg}`}>
       
-      {/* 1. AUDIO ELEMENT (Place your mp3 in /public/music.mp3) */}
+      {/* 1. AUDIO ELEMENT */}
       <audio ref={audioRef} loop src="/music.mp3" />
 
       {/* 2. BACKGROUND LAYERS */}
