@@ -109,11 +109,11 @@ const StoryPage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen p-6 pb-24 text-center">
       <div className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl max-w-lg w-full">
         <h2 className="text-4xl text-white mb-6 font-display">Povestea Noastră</h2>
-        <div className="text-lg md:text-xl text-gray-200 font-serif leading-relaxed space-y-4 mb-8 text-left">
+        <div className="text-lg md:text-xl text-gray-200 font-serif leading-relaxed space-y-4 mb-8 text-center">
           <p>A fost odată ca niciodată o prințesă uimitoare, ce trăia într-un castel fermecat și asculta BTS.</p>
           <p>Într-o zi a apărut la curtea palatului un prinț înfumurat, fără scop și fără direcție.</p>
-          <p>Printr-un miracol neașteptat, prințesa s-a îndrăgostit de prinț</p>
-          <p>De atunci, cei doi au rămas nedespărțiți, trăind fericiți împreună până la adânci bătrâneți.<span className="text-pink-400 font-bold">Iubirea.</span></p>
+          <p>Printr-un miracol neașteptat, prințesa s-a îndrăgostit de prinț.</p>
+          <p>De atunci, cei doi au rămas nedespărțiți, trăind fericiți împreună până la adânci bătrâneți.</p>
         </div>
         
         {/* SVG Heart Animation */}
